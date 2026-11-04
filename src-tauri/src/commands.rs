@@ -214,6 +214,14 @@ pub fn request_cancel(state: State<'_, AppState>, request_id: String) -> Result<
 }
 
 #[tauri::command]
+pub async fn network_diagnose(
+    target: String,
+    proxy: Option<String>,
+) -> Result<crate::netdiag::DiagnoseReport, AppError> {
+    crate::netdiag::diagnose(target, proxy).await
+}
+
+#[tauri::command]
 pub fn open_data_dir(state: State<'_, AppState>) -> Result<(), AppError> {
     let dir = store_lock(&state)?.dir.clone();
     #[cfg(target_os = "windows")]

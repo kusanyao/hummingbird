@@ -6,6 +6,7 @@ import {
 } from "react";
 import logoUrl from "./assets/logo.svg";
 import { EnvironmentDialog } from "./components/EnvironmentDialog";
+import { NetworkDialog } from "./components/NetworkDialog";
 import { RequestPanel } from "./components/RequestPanel";
 import { ResponsePanel } from "./components/ResponsePanel";
 import { SaveDialog } from "./components/SaveDialog";
@@ -188,6 +189,7 @@ function App() {
       <Toasts />
       <SaveDialog />
       <EnvironmentDialog />
+      <NetworkDialog />
       <SettingsDialog />
     </div>
   );

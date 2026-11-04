@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AppError,
   Collection,
+  DiagnoseReport,
   EnvironmentsFile,
   HistoryEntry,
   InitData,
@@ -49,5 +50,7 @@ export const ipc = {
   historyClear: () => call<void>("history_clear"),
   requestSend: (input: SendRequestInput) => call<ResponseData>("request_send", { input }),
   requestCancel: (requestId: string) => call<void>("request_cancel", { requestId }),
+  networkDiagnose: (target: string, proxy: string | null) =>
+    call<DiagnoseReport>("network_diagnose", { target, proxy }),
   openDataDir: () => call<void>("open_data_dir"),
 };

@@ -1,4 +1,4 @@
-import { Settings, SlidersHorizontal } from "lucide-react";
+import { Activity, Settings, SlidersHorizontal } from "lucide-react";
 import logoUrl from "../assets/logo-mark.svg";
 import { useUI } from "../stores/ui";
 import { useWorkspace } from "../stores/workspace";
@@ -10,6 +10,7 @@ export function Sidebar() {
   const setView = useUI((state) => state.setSidebarView);
   const setEnvDialogOpen = useUI((state) => state.setEnvDialogOpen);
   const setSettingsOpen = useUI((state) => state.setSettingsOpen);
+  const setNetDialogOpen = useUI((state) => state.setNetDialogOpen);
 
   const env = useWorkspace((state) => state.env);
   const saveEnv = useWorkspace((state) => state.saveEnv);
@@ -67,6 +68,13 @@ export function Sidebar() {
           onClick={() => setEnvDialogOpen(true)}
         >
           <SlidersHorizontal size={14} />
+        </button>
+        <button
+          className="icon-btn"
+          title="网络诊断"
+          onClick={() => setNetDialogOpen(true)}
+        >
+          <Activity size={14} />
         </button>
         <button
           className="icon-btn"

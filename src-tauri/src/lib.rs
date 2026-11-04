@@ -2,6 +2,7 @@ mod commands;
 mod error;
 mod http;
 mod models;
+mod netdiag;
 mod state;
 mod storage;
 
@@ -31,6 +32,7 @@ pub fn run() {
             commands::history_clear,
             commands::request_send,
             commands::request_cancel,
+            commands::network_diagnose,
             commands::open_data_dir,
         ])
         .run(tauri::generate_context!())

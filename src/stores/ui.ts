@@ -10,11 +10,13 @@ interface UIState {
   sidebarView: "collections" | "history";
   envDialogOpen: boolean;
   settingsOpen: boolean;
+  netDialogOpen: boolean;
   saveDialogTabId: string | null;
   toasts: Toast[];
   setSidebarView: (view: "collections" | "history") => void;
   setEnvDialogOpen: (open: boolean) => void;
   setSettingsOpen: (open: boolean) => void;
+  setNetDialogOpen: (open: boolean) => void;
   setSaveDialogTabId: (id: string | null) => void;
   notify: (message: string, kind?: Toast["kind"]) => void;
   dismiss: (id: number) => void;
@@ -26,12 +28,14 @@ export const useUI = create<UIState>()((set, get) => ({
   sidebarView: "collections",
   envDialogOpen: false,
   settingsOpen: false,
+  netDialogOpen: false,
   saveDialogTabId: null,
   toasts: [],
 
   setSidebarView: (sidebarView) => set({ sidebarView }),
   setEnvDialogOpen: (envDialogOpen) => set({ envDialogOpen }),
   setSettingsOpen: (settingsOpen) => set({ settingsOpen }),
+  setNetDialogOpen: (netDialogOpen) => set({ netDialogOpen }),
   setSaveDialogTabId: (saveDialogTabId) => set({ saveDialogTabId }),
 
   notify: (message, kind = "info") => {

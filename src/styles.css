@@ -977,6 +977,118 @@ textarea {
   font-weight: 700;
 }
 
+/* ---------- network diagnostics ---------- */
+
+.diag-running {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.diag-section {
+  margin-bottom: 14px;
+}
+
+.diag-group-title {
+  padding: 0 2px 6px;
+  color: var(--faint);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.diag-step {
+  display: grid;
+  grid-template-columns: 18px 92px minmax(0, 1fr) 70px;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+
+.diag-step:last-child {
+  border-bottom: none;
+}
+
+.diag-step.skipped {
+  opacity: 0.6;
+}
+
+.diag-name {
+  color: var(--fg);
+}
+
+.diag-detail {
+  overflow: hidden;
+  color: var(--muted);
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.diag-time {
+  color: var(--faint);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.diag-conclusion {
+  margin-top: 4px;
+  padding: 11px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--panel-2);
+  font-size: 12px;
+}
+
+.diag-conclusion.ok {
+  border-color: rgba(61, 220, 151, 0.35);
+  background: var(--accent-soft);
+}
+
+.diag-conclusion.warn {
+  border-color: rgba(251, 191, 36, 0.35);
+  background: rgba(251, 191, 36, 0.08);
+}
+
+.diag-conclusion.bad {
+  border-color: rgba(248, 113, 113, 0.35);
+  background: var(--danger-soft);
+}
+
+.diag-advice {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.5;
+}
+
+.diag-proxy-code {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--input);
+  font-family: "JetBrains Mono", Consolas, monospace;
+  font-size: 11px;
+}
+
+.diag-proxy-code span {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* ---------- code mirror ---------- */
 
 .cm-editor {

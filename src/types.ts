@@ -127,6 +127,25 @@ export interface SendRequestInput {
   spec: RequestSpec;
 }
 
+export interface DiagnoseStep {
+  name: string;
+  ok: boolean;
+  skipped: boolean;
+  detail: string;
+  durationMs: number;
+}
+
+export interface DiagnoseReport {
+  target: string;
+  host: string;
+  port: number;
+  direct: DiagnoseStep[];
+  proxy: DiagnoseStep[];
+  proxyUrl: string | null;
+  conclusion: string;
+  advice: string | null;
+}
+
 export const HTTP_METHODS = [
   "GET",
   "POST",
