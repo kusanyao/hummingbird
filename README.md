@@ -15,6 +15,7 @@
   <img alt="Tauri" src="https://img.shields.io/badge/Tauri-2-24C8DB" />
   <img alt="React" src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black" />
   <img alt="Rust" src="https://img.shields.io/badge/Rust-1.98+-000000?logo=rust&logoColor=white" />
+  <img alt="Release" src="https://img.shields.io/github/v/release/kusanyao/hummingbird?color=3DDC97" />
   <img alt="License" src="https://img.shields.io/badge/license-MIT-3DDC97" />
 </p>
 
@@ -70,9 +71,15 @@ Postman 很好用，但越来越多的时间花在了和调试无关的事情上
 
 ### 下载安装
 
-前往 **Releases** 下载 Windows 安装包（`Hummingbird_x.y.z_x64-setup.exe`），安装后直接运行。也可以使用免安装的 `hummingbird.exe`。
+从 [Releases](https://github.com/kusanyao/hummingbird/releases/latest) 下载：
+
+- **安装版**：`Hummingbird_0.1.0_x64-setup.exe`
+- **免安装版**：`Hummingbird_0.1.0_x64_portable.exe`，双击即可运行
+- **校验文件**：`SHA256SUMS.txt`
 
 > 目前主要在 Windows 10/11 上开发和验证，macOS / Linux 尚未测试。
+>
+> 程序暂未签名，SmartScreen 可能提示“未知发布者”，选择「更多信息 → 仍要运行」即可。
 
 ### 从源码运行
 
