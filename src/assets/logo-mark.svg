@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="67 112 820 820">
+  <defs>
+    <linearGradient id="bird" x1="0.08" y1="0.95" x2="0.92" y2="0.08">
+      <stop offset="0" stop-color="#20b573"/>
+      <stop offset="0.5" stop-color="#3ddc97"/>
+      <stop offset="1" stop-color="#8beeff"/>
+    </linearGradient>
+    <linearGradient id="wing" x1="0.05" y1="0.95" x2="0.95" y2="0.05">
+      <stop offset="0" stop-color="#34d492"/>
+      <stop offset="0.6" stop-color="#63e6c4"/>
+      <stop offset="1" stop-color="#a6f4ff"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0.4">
+      <stop offset="0" stop-color="#ffd166"/>
+      <stop offset="1" stop-color="#ef9f33"/>
+    </linearGradient>
+  </defs>
+
+  <g transform="rotate(-27 512 512)">
+    <path d="M 420 492 C 320 462 220 438 120 424 C 240 486 340 522 412 540 Z" fill="url(#bird)" opacity="0.92"/>
+    <path d="M 410 548 C 330 600 240 660 168 716 C 282 682 372 628 424 578 Z" fill="url(#bird)" opacity="0.72"/>
+
+    <path d="M 648 384
+             C 738 384 792 446 784 512
+             C 776 578 714 618 632 618
+             C 552 618 474 594 408 552
+             C 378 533 358 514 344 492
+             C 398 486 456 470 510 446
+             C 560 424 606 392 648 384 Z"
+          fill="url(#bird)"/>
+
+    <path d="M 468 452
+             C 494 356 578 286 714 258
+             C 678 326 620 398 572 476
+             C 538 468 504 460 468 452 Z"
+          fill="url(#wing)"/>
+    <path d="M 512 446 C 548 386 610 326 682 286" stroke="#0a2a22" stroke-width="9" stroke-linecap="round" fill="none" opacity="0.2"/>
+
+    <path d="M 750 440 L 948 388 L 766 498 Z" fill="url(#gold)"/>
+
+    <circle cx="726" cy="452" r="12" fill="#06130f"/>
+    <circle cx="730" cy="448" r="4" fill="#e2fdf2" opacity="0.85"/>
+  </g>
+</svg>

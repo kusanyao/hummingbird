@@ -1,0 +1,7 @@
+# Use the rsproxy mirror for faster crate downloads in mainland China.
+# Remove this file (or the source replacement below) if you prefer crates.io.
+[source.crates-io]
+replace-with = "rsproxy-sparse"
+
+[source.rsproxy-sparse]
+registry = "sparse+https://rsproxy.cn/index/"
