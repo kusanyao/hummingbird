@@ -83,8 +83,8 @@ Postman 很好用，但越来越多的时间花在了和调试无关的事情上
 
 从 [Releases](https://github.com/kusanyao/hummingbird/releases/latest) 下载：
 
-- **安装版**：`Hummingbird_0.1.0_x64-setup.exe`
-- **免安装版**：`Hummingbird_0.1.0_x64_portable.exe`，双击即可运行
+- **安装版**：`Hummingbird_0.2.0_x64-setup.exe`
+- **免安装版**：`Hummingbird_0.2.0_x64_portable.exe`，双击即可运行
 - **校验文件**：`SHA256SUMS.txt`
 
 > 目前主要在 Windows 10/11 上开发和验证，macOS / Linux 尚未测试。
@@ -118,7 +118,7 @@ npm run tauri build
 
 ```text
 src-tauri/target/release/hummingbird.exe
-src-tauri/target/release/bundle/nsis/Hummingbird_0.1.0_x64-setup.exe
+src-tauri/target/release/bundle/nsis/Hummingbird_0.2.0_x64-setup.exe
 ```
 
 > **Windows 构建提示**
