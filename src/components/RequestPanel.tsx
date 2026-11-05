@@ -1,14 +1,12 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
-import { ClipboardPaste, Save, Send, Square, Terminal } from "lucide-react";
+import { Save, Send, Square, Terminal } from "lucide-react";
 import { cancelTab, saveTabToCollection, sendTab } from "../lib/actions";
-import { copyText } from "../lib/clipboard";
-import { ipc, toAppError } from "../lib/ipc";
 import { useTabs, type Tab } from "../stores/tabs";
 import { useUI } from "../stores/ui";
 import { HTTP_METHODS, type RequestSpec } from "../types";
 import { AuthEditor } from "./AuthEditor";
 import { BodyEditor } from "./BodyEditor";
-import { CurlImportDialog } from "./CurlImportDialog";
+import { CurlDialog } from "./CurlDialog";
 import { KeyValueEditor } from "./KeyValueEditor";
 
 type SubTab = "params" | "headers" | "body" | "auth";
@@ -54,16 +52,6 @@ export function RequestPanel({ tab, style }: RequestPanelProps) {
     }
     const saved = await saveTabToCollection(tab.id);
     notify(saved ? "已保存" : "保存失败", saved ? "success" : "error");
-  };
-
-  const copyCurl = async () => {
-    try {
-      const command = await ipc.curlExport(tab.spec);
-      await copyText(command);
-      notify("cURL 已复制", "success");
-    } catch (err) {
-      notify(toAppError(err).message, "error");
-    }
   };
 
   return (
@@ -113,14 +101,7 @@ export function RequestPanel({ tab, style }: RequestPanelProps) {
         <button
           className="icon-btn"
           onClick={() => setCurlOpen(true)}
-          title="导入 cURL"
-        >
-          <ClipboardPaste size={15} />
-        </button>
-        <button
-          className="icon-btn"
-          onClick={() => void copyCurl()}
-          title="复制为 cURL"
+          title="cURL"
         >
           <Terminal size={15} />
         </button>
@@ -185,7 +166,7 @@ export function RequestPanel({ tab, style }: RequestPanelProps) {
         ) : null}
       </div>
 
-      <CurlImportDialog open={curlOpen} onClose={() => setCurlOpen(false)} />
+      <CurlDialog open={curlOpen} tab={tab} onClose={() => setCurlOpen(false)} />
     </div>
   );
 }

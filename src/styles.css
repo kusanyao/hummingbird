@@ -977,6 +977,32 @@ textarea {
   font-weight: 700;
 }
 
+/* ---------- curl dialog ---------- */
+
+.curl-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 20px;
+  margin-top: 8px;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.4;
+}
+
+.curl-status.synced {
+  color: var(--accent);
+}
+
+.curl-status.error {
+  color: var(--danger);
+}
+
+.curl-status .spinner {
+  width: 12px;
+  height: 12px;
+}
+
 /* ---------- network diagnostics ---------- */
 
 .diag-running {
