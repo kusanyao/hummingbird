@@ -127,6 +127,11 @@ export interface SendRequestInput {
   spec: RequestSpec;
 }
 
+export interface CurlImport {
+  spec: RequestSpec;
+  warnings: string[];
+}
+
 export interface DiagnoseStep {
   name: string;
   ok: boolean;

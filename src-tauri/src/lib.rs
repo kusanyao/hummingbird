@@ -1,4 +1,5 @@
 mod commands;
+mod curl;
 mod error;
 mod http;
 mod models;
@@ -14,6 +15,7 @@ use storage::Store;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_clipboard_manager::init())
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             let store = Store::load(data_dir)?;
@@ -33,6 +35,8 @@ pub fn run() {
             commands::request_send,
             commands::request_cancel,
             commands::network_diagnose,
+            commands::curl_import,
+            commands::curl_export,
             commands::open_data_dir,
         ])
         .run(tauri::generate_context!())

@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { Copy, FileWarning, Inbox } from "lucide-react";
+import { copyText } from "../lib/clipboard";
 import { formatBytes, formatDuration, prettyJson, statusColor } from "../lib/utils";
 import { useUI } from "../stores/ui";
 import type { Tab } from "../stores/tabs";
@@ -28,7 +29,7 @@ export function ResponsePanel({ tab, style }: ResponsePanelProps) {
 
   const copyBody = async () => {
     if (!response) return;
-    await navigator.clipboard.writeText(response.bodyText);
+    await copyText(response.bodyText);
     notify("响应内容已复制", "success");
   };
 

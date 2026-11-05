@@ -2,10 +2,12 @@ import { invoke } from "@tauri-apps/api/core";
 import type {
   AppError,
   Collection,
+  CurlImport,
   DiagnoseReport,
   EnvironmentsFile,
   HistoryEntry,
   InitData,
+  RequestSpec,
   ResponseData,
   SendRequestInput,
   Settings,
@@ -52,5 +54,7 @@ export const ipc = {
   requestCancel: (requestId: string) => call<void>("request_cancel", { requestId }),
   networkDiagnose: (target: string, proxy: string | null) =>
     call<DiagnoseReport>("network_diagnose", { target, proxy }),
+  curlImport: (input: string) => call<CurlImport>("curl_import", { input }),
+  curlExport: (spec: RequestSpec) => call<string>("curl_export", { spec }),
   openDataDir: () => call<void>("open_data_dir"),
 };

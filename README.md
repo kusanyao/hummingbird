@@ -52,6 +52,12 @@ Postman 很好用，但越来越多的时间花在了和调试无关的事情上
 - JSON 自动美化 / 原文切换，支持复制
 - 超长响应自动截断，二进制响应给出提示
 
+**cURL 互操作**
+
+- 粘贴 curl 命令直接生成请求，支持 `-X`、`-H`、`-d`、`--data-raw`、`-F`、`-u`、`-G`、`--json` 等常用参数
+- 当前请求一键复制为 cURL，历史记录中的每条请求也可以单独复制
+- 导出时按当前环境替换 `{{变量}}`，生成可直接执行的命令
+
 **组织**
 
 - 集合 / 文件夹 / 请求树，支持新建、重命名、复制、删除、搜索
@@ -246,6 +252,7 @@ cargo fmt
 - No login, no cloud sync, no telemetry — everything is stored locally as JSON files
 - Requests are executed by the Rust backend, so there are no CORS restrictions
 - Collections, folders, environments with `{{variables}}`, history, tabs and autosave
+- Import curl commands and copy any request back to a runnable curl command
 - Small footprint: the NSIS installer is about 1.7 MB
 
 Build from source with `npm install && npm run tauri dev`. See the Chinese sections above for details.

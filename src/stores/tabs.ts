@@ -48,6 +48,7 @@ interface TabsState {
     spec: RequestSpec,
   ) => void;
   openHistory: (entry: HistoryEntry) => void;
+  openDraft: (title: string, spec: RequestSpec) => void;
   closeTab: (id: string) => void;
   activate: (id: string) => void;
   setSpec: (id: string, spec: RequestSpec) => void;
@@ -93,6 +94,17 @@ export const useTabs = create<TabsState>()((set, get) => ({
       id: uid(),
       title: entry.name || entry.url,
       spec: cloneSpec(entry.spec),
+      dirty: false,
+      sending: false,
+    };
+    set({ tabs: [...get().tabs, tab], activeId: tab.id });
+  },
+
+  openDraft: (title, spec) => {
+    const tab: Tab = {
+      id: uid(),
+      title,
+      spec: cloneSpec(spec),
       dirty: false,
       sending: false,
     };

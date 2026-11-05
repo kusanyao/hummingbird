@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Terminal, Trash2 } from "lucide-react";
+import { copyText } from "../lib/clipboard";
+import { ipc, toAppError } from "../lib/ipc";
 import { useTabs } from "../stores/tabs";
+import { useUI } from "../stores/ui";
 import { useWorkspace } from "../stores/workspace";
 import { formatDuration, methodColor, statusColor, timeAgo } from "../lib/utils";
+import type { HistoryEntry } from "../types";
 import { Modal } from "./common/Modal";
 
 export function HistoryList() {
@@ -10,7 +14,18 @@ export function HistoryList() {
   const removeHistory = useWorkspace((state) => state.removeHistory);
   const clearHistory = useWorkspace((state) => state.clearHistory);
   const openHistory = useTabs((state) => state.openHistory);
+  const notify = useUI((state) => state.notify);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  const copyCurl = async (entry: HistoryEntry) => {
+    try {
+      const command = await ipc.curlExport(entry.spec);
+      await copyText(command);
+      notify("cURL 已复制", "success");
+    } catch (err) {
+      notify(toAppError(err).message, "error");
+    }
+  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: 0, flex: 1 }}>
@@ -56,6 +71,17 @@ export function HistoryList() {
               <span className="faint" style={{ fontSize: 10 }}>
                 {formatDuration(entry.durationMs)}
               </span>
+              <button
+                className="icon-btn"
+                style={{ width: 18, height: 18 }}
+                title="复制为 cURL"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  void copyCurl(entry);
+                }}
+              >
+                <Terminal size={11} />
+              </button>
               <button
                 className="icon-btn"
                 style={{ width: 18, height: 18 }}

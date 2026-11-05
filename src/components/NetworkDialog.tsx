@@ -6,6 +6,7 @@ import {
   MinusCircle,
   XCircle,
 } from "lucide-react";
+import { copyText } from "../lib/clipboard";
 import { ipc, toAppError } from "../lib/ipc";
 import { useUI } from "../stores/ui";
 import type { AppError, DiagnoseReport, DiagnoseStep } from "../types";
@@ -93,7 +94,7 @@ export function NetworkDialog() {
 
   const copyProxy = async () => {
     if (!report?.proxyUrl) return;
-    await navigator.clipboard.writeText(report.proxyUrl);
+    await copyText(report.proxyUrl);
     notify("代理地址已复制", "success");
   };
 

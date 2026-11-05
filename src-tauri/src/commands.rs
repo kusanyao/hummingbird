@@ -4,8 +4,8 @@ use tauri::State;
 
 use crate::error::AppError;
 use crate::models::{
-    Collection, EnvironmentsFile, HistoryEntry, InitData, ResponseData, SCHEMA_VERSION,
-    SendRequestInput, Settings,
+    Collection, EnvironmentsFile, HistoryEntry, InitData, RequestSpec, ResponseData,
+    SCHEMA_VERSION, SendRequestInput, Settings,
 };
 use crate::state::AppState;
 use crate::storage::Store;
@@ -211,6 +211,17 @@ pub fn request_cancel(state: State<'_, AppState>, request_id: String) -> Result<
         token.cancel();
     }
     Ok(())
+}
+
+#[tauri::command]
+pub fn curl_import(input: String) -> Result<crate::curl::CurlImport, AppError> {
+    crate::curl::parse(&input)
+}
+
+#[tauri::command]
+pub fn curl_export(state: State<'_, AppState>, spec: RequestSpec) -> Result<String, AppError> {
+    let vars = store_lock(&state)?.resolve_variables();
+    crate::curl::export(&spec, &vars)
 }
 
 #[tauri::command]
