@@ -51,6 +51,12 @@ function App() {
   }, [settings.theme]);
 
   useEffect(() => {
+    const blockContextMenu = (event: MouseEvent) => event.preventDefault();
+    window.addEventListener("contextmenu", blockContextMenu);
+    return () => window.removeEventListener("contextmenu", blockContextMenu);
+  }, []);
+
+  useEffect(() => {
     setRatio(settings.splitRatio);
   }, [settings.splitRatio]);
 

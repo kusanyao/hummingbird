@@ -212,7 +212,6 @@ export function CollectionTree() {
               openRequest(collection.id, item.id, item.name, item.spec);
             }
           }}
-          onContextMenu={(event) => openMenu(event, collection.id, item)}
         >
           {isFolder ? (
             <span className="chevron">
@@ -270,7 +269,6 @@ export function CollectionTree() {
           className="tree-row"
           style={{ fontWeight: 600 }}
           onClick={() => toggle(collection.id)}
-          onContextMenu={(event) => openMenu(event, collection.id)}
         >
           <span className="chevron">
             {isCollapsed ? <ChevronRight size={12} /> : <ChevronDown size={12} />}

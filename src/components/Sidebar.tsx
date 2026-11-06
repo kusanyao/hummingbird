@@ -13,6 +13,7 @@ export function Sidebar() {
   const setNetDialogOpen = useUI((state) => state.setNetDialogOpen);
 
   const env = useWorkspace((state) => state.env);
+  const version = useWorkspace((state) => state.version);
   const saveEnv = useWorkspace((state) => state.saveEnv);
   const activeEnv = env.environments.find((item) => item.id === env.activeId);
 
@@ -21,7 +22,14 @@ export function Sidebar() {
       <div className="sidebar-header">
         <img src={logoUrl} alt="蜂鸟" className="logo-mark" />
         <div style={{ minWidth: 0 }}>
-          <div style={{ fontWeight: 700, fontSize: 13 }}>蜂鸟</div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+            <span style={{ fontWeight: 700, fontSize: 13 }}>蜂鸟</span>
+            {version ? (
+              <span className="faint" style={{ fontSize: 10.5 }}>
+                v{version}
+              </span>
+            ) : null}
+          </div>
           <div className="faint" style={{ fontSize: 10.5 }}>
             本地优先 API 客户端
           </div>
