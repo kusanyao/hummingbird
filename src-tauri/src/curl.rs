@@ -5,6 +5,7 @@ use url::Url;
 
 use crate::error::AppError;
 use crate::models::{Auth, KeyValue, RequestBody, RequestSpec};
+use crate::template::TemplateContext;
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -591,56 +592,25 @@ pub fn parse(input: &str) -> Result<CurlImport, AppError> {
     Ok(CurlImport { spec, warnings })
 }
 
-fn interpolate(input: &str, vars: &HashMap<String, String>) -> String {
-    let mut output = String::with_capacity(input.len());
-    let mut rest = input;
-    while let Some(start) = rest.find("{{") {
-        output.push_str(&rest[..start]);
-        let after = &rest[start + 2..];
-        if let Some(end) = after.find("}}") {
-            let name = after[..end].trim();
-            if let Some(value) = vars.get(name) {
-                output.push_str(value);
-            } else {
-                output.push_str(&rest[start..start + 2 + end + 2]);
-            }
-            rest = &after[end + 2..];
-        } else {
-            output.push_str(&rest[start..]);
-            rest = "";
-        }
-    }
-    output.push_str(rest);
-    output
+fn interp(template: &mut TemplateContext, value: &str) -> String {
+    template.resolve(value).0
 }
 
 fn shell_quote(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
 }
 
-fn with_builtins(base: &HashMap<String, String>) -> HashMap<String, String> {
-    let mut vars = base.clone();
-    vars.entry("$timestamp".to_string())
-        .or_insert_with(|| chrono::Utc::now().timestamp().to_string());
-    vars.entry("$isoTimestamp".to_string())
-        .or_insert_with(|| chrono::Utc::now().to_rfc3339());
-    vars.entry("$uuid".to_string())
-        .or_insert_with(|| uuid::Uuid::new_v4().to_string());
-    vars
-}
-
-fn build_url(spec: &RequestSpec, vars: &HashMap<String, String>) -> Result<String, AppError> {
-    let raw = interpolate(&spec.url, vars);
+fn build_url(spec: &RequestSpec, template: &mut TemplateContext) -> Result<String, AppError> {
+    let raw = interp(template, &spec.url);
     let mut url = normalize_url(&raw)?;
     for param in enabled_rows(&spec.params) {
-        url.query_pairs_mut().append_pair(
-            &interpolate(&param.key, vars),
-            &interpolate(&param.value, vars),
-        );
+        let key = interp(template, &param.key);
+        let value = interp(template, &param.value);
+        url.query_pairs_mut().append_pair(&key, &value);
     }
     if spec.auth.r#type == "apiKey" && spec.auth.location == "query" {
-        let key = interpolate(&spec.auth.key, vars);
-        let value = interpolate(&spec.auth.value, vars);
+        let key = interp(template, &spec.auth.key);
+        let value = interp(template, &spec.auth.value);
         if !key.is_empty() {
             url.query_pairs_mut().append_pair(&key, &value);
         }
@@ -649,8 +619,8 @@ fn build_url(spec: &RequestSpec, vars: &HashMap<String, String>) -> Result<Strin
 }
 
 pub fn export(spec: &RequestSpec, base_vars: &HashMap<String, String>) -> Result<String, AppError> {
-    let vars = with_builtins(base_vars);
-    let url = build_url(spec, &vars)?;
+    let mut template = TemplateContext::new(base_vars);
+    let url = build_url(spec, &mut template)?;
     let method = spec.method.to_uppercase();
     let mut parts: Vec<String> = vec!["curl".to_string()];
 
@@ -669,33 +639,29 @@ pub fn export(spec: &RequestSpec, base_vars: &HashMap<String, String>) -> Result
     parts.push(shell_quote(&url));
 
     for header in enabled_rows(&spec.headers) {
+        let key = interp(&mut template, &header.key);
+        let value = interp(&mut template, &header.value);
         parts.push("-H".to_string());
-        parts.push(shell_quote(&format!(
-            "{}: {}",
-            interpolate(&header.key, &vars),
-            interpolate(&header.value, &vars)
-        )));
+        parts.push(shell_quote(&format!("{key}: {value}")));
     }
 
     match spec.auth.r#type.as_str() {
         "bearer" => {
-            let token = interpolate(&spec.auth.token, &vars);
+            let token = interp(&mut template, &spec.auth.token);
             if !token.is_empty() {
                 parts.push("-H".to_string());
                 parts.push(shell_quote(&format!("Authorization: Bearer {token}")));
             }
         }
         "basic" => {
+            let username = interp(&mut template, &spec.auth.username);
+            let password = interp(&mut template, &spec.auth.password);
             parts.push("-u".to_string());
-            parts.push(shell_quote(&format!(
-                "{}:{}",
-                interpolate(&spec.auth.username, &vars),
-                interpolate(&spec.auth.password, &vars)
-            )));
+            parts.push(shell_quote(&format!("{username}:{password}")));
         }
         "apiKey" if spec.auth.location == "header" => {
-            let key = interpolate(&spec.auth.key, &vars);
-            let value = interpolate(&spec.auth.value, &vars);
+            let key = interp(&mut template, &spec.auth.key);
+            let value = interp(&mut template, &spec.auth.value);
             if !key.is_empty() {
                 parts.push("-H".to_string());
                 parts.push(shell_quote(&format!("{key}: {value}")));
@@ -706,7 +672,7 @@ pub fn export(spec: &RequestSpec, base_vars: &HashMap<String, String>) -> Result
 
     match spec.body.r#type.as_str() {
         "json" | "text" => {
-            let raw = interpolate(&spec.body.raw, &vars);
+            let raw = interp(&mut template, &spec.body.raw);
             if !raw.is_empty() {
                 parts.push("--data-raw".to_string());
                 parts.push(shell_quote(&raw));
@@ -714,22 +680,18 @@ pub fn export(spec: &RequestSpec, base_vars: &HashMap<String, String>) -> Result
         }
         "formUrlEncoded" => {
             for field in enabled_rows(&spec.body.fields) {
+                let key = interp(&mut template, &field.key);
+                let value = interp(&mut template, &field.value);
                 parts.push("--data-urlencode".to_string());
-                parts.push(shell_quote(&format!(
-                    "{}={}",
-                    interpolate(&field.key, &vars),
-                    interpolate(&field.value, &vars)
-                )));
+                parts.push(shell_quote(&format!("{key}={value}")));
             }
         }
         "multipart" => {
             for field in enabled_rows(&spec.body.fields) {
+                let key = interp(&mut template, &field.key);
+                let value = interp(&mut template, &field.value);
                 parts.push("-F".to_string());
-                parts.push(shell_quote(&format!(
-                    "{}={}",
-                    interpolate(&field.key, &vars),
-                    interpolate(&field.value, &vars)
-                )));
+                parts.push(shell_quote(&format!("{key}={value}")));
             }
         }
         _ => {}

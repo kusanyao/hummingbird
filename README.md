@@ -84,6 +84,29 @@ Postman 很好用，但越来越多的时间花在了和调试无关的事情上
 - 数据以 JSON 文件保存在本机（见[数据与隐私](#数据与隐私)）
 - 原子写入 + `.bak` 备份 + 每日快照，避免异常退出损坏数据
 
+## 动态变量
+
+发送请求和生成 cURL 时，以下变量会在执行时生成：
+
+| 变量 | 说明 |
+| --- | --- |
+| `{{$randomInt}}` / `{{$randomInt(1,100)}}` | 随机整数 |
+| `{{$randomFloat}}` / `{{$randomFloat(1,10,3)}}` | 随机小数 |
+| `{{$randomBoolean}}` | `true` / `false` |
+| `{{$randomAlphaNumeric}}` / `{{$randomAlphaNumeric(16)}}` | 随机字母数字 |
+| `{{$randomUUID}}` | 随机 UUID |
+| `{{$randomEmail}}` | 随机邮箱 |
+| `{{$randomFirstName}}` / `{{$randomLastName}}` / `{{$randomFullName}}` | 随机姓名 |
+| `{{$randomPhoneNumber}}` | 随机手机号 |
+| `{{$randomWord}}` | 随机单词 |
+| `{{$randomDate}}` | 最近一年内的随机日期 |
+| `{{$timestamp}}` / `{{$isoTimestamp}}` / `{{$uuid}}` | 内置时间与 UUID |
+
+- 不带 `.once`：每次出现都重新生成
+- 带 `.once`（如 `{{$randomUUID.once}}`）：同一次请求内复用第一次生成的值
+- 环境变量可以覆盖同名变量
+- 发送请求与生成 cURL 共用同一套生成逻辑
+
 ## 快速开始
 
 ### 下载安装

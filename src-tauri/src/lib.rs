@@ -6,6 +6,7 @@ mod models;
 mod netdiag;
 mod state;
 mod storage;
+mod template;
 
 use tauri::Manager;
 

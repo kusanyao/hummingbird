@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { HelpCircle, Plus, Trash2 } from "lucide-react";
 import { useUI } from "../stores/ui";
 import { useWorkspace } from "../stores/workspace";
 import { cloneEnvironments, emptyRow, type EnvironmentsFile } from "../types";
 import { uid } from "../lib/utils";
+import { DynamicVarsDialog } from "./DynamicVarsDialog";
 import { KeyValueEditor } from "./KeyValueEditor";
 import { Modal } from "./common/Modal";
 
@@ -16,6 +17,7 @@ export function EnvironmentDialog() {
 
   const [draft, setDraft] = useState<EnvironmentsFile>(env);
   const [selected, setSelected] = useState<string>("globals");
+  const [varsHelpOpen, setVarsHelpOpen] = useState(false);
 
   useEffect(() => {
     if (!open) return;
@@ -73,6 +75,12 @@ export function EnvironmentDialog() {
       width={780}
       footer={
         <>
+          <button
+            className="btn btn-ghost"
+            onClick={() => setVarsHelpOpen(true)}
+          >
+            <HelpCircle size={13} /> 动态变量
+          </button>
           <span className="muted" style={{ marginRight: "auto", fontSize: 11.5 }}>
             发送请求时，{"{{变量名}}"} 会自动替换为当前环境中的值。
           </span>
@@ -174,6 +182,11 @@ export function EnvironmentDialog() {
           ) : null}
         </div>
       </div>
+
+      <DynamicVarsDialog
+        open={varsHelpOpen}
+        onClose={() => setVarsHelpOpen(false)}
+      />
     </Modal>
   );
 }

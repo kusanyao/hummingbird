@@ -10,6 +10,7 @@ use tokio_util::sync::CancellationToken;
 
 use crate::error::AppError;
 use crate::models::{HeaderPair, RequestSpec, ResponseData, Settings};
+use crate::template::TemplateContext;
 
 /// Executes a request with interpolated variables. Tauri-free so it can be
 /// unit tested without a WebView.
@@ -20,10 +21,10 @@ pub async fn execute(
     cookies: Arc<Jar>,
     cancel: CancellationToken,
 ) -> Result<ResponseData, AppError> {
-    let vars = with_builtin_variables(base_vars);
+    let mut template = TemplateContext::new(base_vars);
     let mut missing: Vec<String> = Vec::new();
 
-    let url_raw = interpolate(&spec.url, &vars, &mut missing);
+    let url_raw = resolve(&mut template, &spec.url, &mut missing);
     let url_raw = url_raw.trim();
     if url_raw.is_empty() {
         return Err(AppError::new("invalid_url", "请先填写请求 URL"));
@@ -40,8 +41,8 @@ pub async fn execute(
     }
 
     for item in enabled(&spec.params) {
-        let key = interpolate(&item.key, &vars, &mut missing);
-        let value = interpolate(&item.value, &vars, &mut missing);
+        let key = resolve(&mut template, &item.key, &mut missing);
+        let value = resolve(&mut template, &item.value, &mut missing);
         if !key.is_empty() {
             url.query_pairs_mut().append_pair(&key, &value);
         }
@@ -49,8 +50,8 @@ pub async fn execute(
 
     let mut headers = HeaderMap::new();
     for item in enabled(&spec.headers) {
-        let key = interpolate(&item.key, &vars, &mut missing);
-        let value = interpolate(&item.value, &vars, &mut missing);
+        let key = resolve(&mut template, &item.key, &mut missing);
+        let value = resolve(&mut template, &item.value, &mut missing);
         if key.is_empty() {
             continue;
         }
@@ -73,15 +74,15 @@ pub async fn execute(
 
     // API key in query string.
     if spec.auth.r#type == "apiKey" && spec.auth.location == "query" {
-        let key = interpolate(&spec.auth.key, &vars, &mut missing);
-        let value = interpolate(&spec.auth.value, &vars, &mut missing);
+        let key = resolve(&mut template, &spec.auth.key, &mut missing);
+        let value = resolve(&mut template, &spec.auth.value, &mut missing);
         if !key.is_empty() {
             url.query_pairs_mut().append_pair(&key, &value);
         }
     }
 
     let body_raw = match spec.body.r#type.as_str() {
-        "json" | "text" => Some(interpolate(&spec.body.raw, &vars, &mut missing)),
+        "json" | "text" => Some(resolve(&mut template, &spec.body.raw, &mut missing)),
         _ => None,
     };
     if !missing.is_empty() {
@@ -140,8 +141,8 @@ pub async fn execute(
         "formUrlEncoded" => {
             let mut serializer = url::form_urlencoded::Serializer::new(String::new());
             for item in enabled(&spec.body.fields) {
-                let key = interpolate(&item.key, &vars, &mut missing);
-                let value = interpolate(&item.value, &vars, &mut missing);
+                let key = resolve(&mut template, &item.key, &mut missing);
+                let value = resolve(&mut template, &item.value, &mut missing);
                 if !key.is_empty() {
                     serializer.append_pair(&key, &value);
                 }
@@ -154,8 +155,8 @@ pub async fn execute(
         "multipart" => {
             let mut form = reqwest::multipart::Form::new();
             for item in enabled(&spec.body.fields) {
-                let key = interpolate(&item.key, &vars, &mut missing);
-                let value = interpolate(&item.value, &vars, &mut missing);
+                let key = resolve(&mut template, &item.key, &mut missing);
+                let value = resolve(&mut template, &item.value, &mut missing);
                 if !key.is_empty() {
                     form = form.text(key, value);
                 }
@@ -167,19 +168,19 @@ pub async fn execute(
 
     match spec.auth.r#type.as_str() {
         "bearer" => {
-            let token = interpolate(&spec.auth.token, &vars, &mut missing);
+            let token = resolve(&mut template, &spec.auth.token, &mut missing);
             if !token.is_empty() {
                 request = request.bearer_auth(token);
             }
         }
         "basic" => {
-            let username = interpolate(&spec.auth.username, &vars, &mut missing);
-            let password = interpolate(&spec.auth.password, &vars, &mut missing);
+            let username = resolve(&mut template, &spec.auth.username, &mut missing);
+            let password = resolve(&mut template, &spec.auth.password, &mut missing);
             request = request.basic_auth(username, Some(password));
         }
         "apiKey" if spec.auth.location == "header" => {
-            let key = interpolate(&spec.auth.key, &vars, &mut missing);
-            let value = interpolate(&spec.auth.value, &vars, &mut missing);
+            let key = resolve(&mut template, &spec.auth.key, &mut missing);
+            let value = resolve(&mut template, &spec.auth.value, &mut missing);
             if !key.is_empty() {
                 request = request.header(key, value);
             }
@@ -277,46 +278,9 @@ fn enabled(
     items.iter().filter(|item| item.enabled)
 }
 
-fn with_builtin_variables(base: &HashMap<String, String>) -> HashMap<String, String> {
-    let mut vars = base.clone();
-    vars.entry("$timestamp".to_string())
-        .or_insert_with(|| chrono::Utc::now().timestamp().to_string());
-    vars.entry("$isoTimestamp".to_string())
-        .or_insert_with(|| chrono::Utc::now().to_rfc3339());
-    vars.entry("$uuid".to_string())
-        .or_insert_with(|| uuid::Uuid::new_v4().to_string());
-    vars
-}
-
-/// Replaces `{{name}}` with the matching variable. Unresolved names are
-/// collected so the caller can fail loudly instead of sending literal braces.
-fn interpolate(input: &str, vars: &HashMap<String, String>, missing: &mut Vec<String>) -> String {
-    let mut output = String::with_capacity(input.len());
-    let mut index = 0;
-    let bytes = input.as_bytes();
-    while index < bytes.len() {
-        if bytes[index] == b'{' && index + 1 < bytes.len() && bytes[index + 1] == b'{' {
-            if let Some(relative_end) = input[index + 2..].find("}}") {
-                let name = input[index + 2..index + 2 + relative_end]
-                    .trim()
-                    .to_string();
-                if !name.is_empty() && !name.contains('{') {
-                    match vars.get(&name) {
-                        Some(value) => output.push_str(value),
-                        None => {
-                            missing.push(name);
-                            output.push_str(&input[index..index + 2 + relative_end + 2]);
-                        }
-                    }
-                    index += 2 + relative_end + 2;
-                    continue;
-                }
-            }
-        }
-        let ch = input[index..].chars().next().unwrap_or('\u{FFFD}');
-        output.push(ch);
-        index += ch.len_utf8();
-    }
+fn resolve(template: &mut TemplateContext, value: &str, missing: &mut Vec<String>) -> String {
+    let (output, unresolved) = template.resolve(value);
+    missing.extend(unresolved);
     output
 }
 
@@ -372,20 +336,18 @@ mod tests {
     fn interpolates_known_variables() {
         let mut vars = HashMap::new();
         vars.insert("base".to_string(), "https://example.com".to_string());
+        let mut template = TemplateContext::new(&vars);
         let mut missing = Vec::new();
-        let out = interpolate("{{base}}/api?x={{n}}", &vars, &mut missing);
+        let out = resolve(&mut template, "{{base}}/api?x={{n}}", &mut missing);
         assert_eq!(out, "https://example.com/api?x={{n}}");
         assert_eq!(missing, vec!["n".to_string()]);
     }
 
     #[test]
     fn leaves_unrelated_braces_alone() {
+        let mut template = TemplateContext::new(&HashMap::<String, String>::new());
         let mut missing = Vec::new();
-        let out = interpolate(
-            r#"{"a":1}"#,
-            &HashMap::<String, String>::new(),
-            &mut missing,
-        );
+        let out = resolve(&mut template, r#"{"a":1}"#, &mut missing);
         assert_eq!(out, r#"{"a":1}"#);
         assert!(missing.is_empty());
     }

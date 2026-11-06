@@ -1,6 +1,6 @@
 [package]
 name = "hummingbird"
-version = "0.3.0"
+version = "0.4.0"
 description = "Hummingbird - a local-first API client"
 authors = ["zhongshaoqing"]
 edition = "2024"
@@ -20,6 +20,7 @@ serde_json = "1"
 thiserror = "2"
 uuid = { version = "1", features = ["v4"] }
 chrono = { version = "0.4", features = ["serde"] }
+rand = "0.8"
 url = "2"
 reqwest = { version = "0.12", features = ["json", "gzip", "brotli", "deflate", "multipart", "cookies", "stream", "socks"] }
 tokio = { version = "1", features = ["rt", "time", "sync", "macros"] }
